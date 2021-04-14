@@ -37,23 +37,121 @@ let chart = c3.generate({
     },
   },
 });
+// DOM
+const orderTable = document.querySelector(".js-orderTable");
+const allOrderTable = document.querySelector(".orderPage-table");
 // 初始化
 console.log(baseUrl, path, token);
 function init() {
   getOrderList();
 }
 init();
+// ------ 監聽
+allOrderTable.addEventListener("click", function (e) {
+  e.preventDefault();
+  if (!e.target.dataset.status) {
+    console.log("not btn");
+    return;
+  } else {
+    // 修改訂單
+    let dataStr = e.target.dataset.status;
+    let id = e.target.dataset.id;
+    if (dataStr === "false") {
+      dataStr = false;
+    } else if (dataStr === "true") {
+      dataStr = true;
+    }
+    console.log(dataStr);
+    changeOrderStatus(dataStr, id);
+  }
+});
+
+// ------ 監聽結束
 // 定義資料
 let orderList = [];
 // 取得訂單
 function getOrderList() {
   axios
-    .get(`${baseUrl}${path}/orders`, {
+    .get(`${baseUrl}admin/${path}/orders`, {
       headers: {
         authorization: token,
       },
     })
     .then((res) => {
-      console.log(res.data);
+      orderList = res.data.orders;
+      renderOrderList();
     });
+}
+// 渲染訂單
+function renderOrderList() {
+  let str = "";
+  orderList.forEach((item) => {
+    // 處理產品字串
+    // 處理日期字串
+    let dateStr = formatDateStr(item.createdAt);
+    // 處理訂單狀態字串
+    let orderStatus = formatStatusStr(item.paid);
+    // 表格字串
+    str += `<tr>
+      <td>${item.id}</td>
+      <td>
+        <p>${item.user.name}</p>
+        <p>${item.user.tel}</p>
+      </td>
+      <td>${item.user.address}</td>
+      <td>${item.user.email}</td>
+      <td>
+        <p>Louvre 雙人床架</p>
+      </td>
+      <td>${dateStr}</td>
+      <td class="orderStatus">
+        <a href="#" data-status="${item.paid}" data-id="${item.id}">${orderStatus}</a>
+      </td>
+      <td>
+        <input type="button" class="delSingleOrder-Btn" data-id="${item.id}" value="刪除">
+      </td>
+    </tr>`;
+  });
+  orderTable.innerHTML = str;
+}
+// 修改訂單
+function changeOrderStatus(status, id) {
+  axios
+    .put(
+      `${baseUrl}admin/${path}/orders`,
+      {
+        data: {
+          id: id,
+          paid: !status,
+        },
+      },
+      {
+        headers: {
+          authorization: token,
+        },
+      }
+    )
+    .then((res) => {
+      getOrderList();
+    });
+}
+
+// 處理訂單字串
+function formatDateStr(timestamp) {
+  // 處理日期字串
+  let orderDate = new Date(timestamp * 1000);
+  let year = orderDate.getFullYear();
+  let month = orderDate.getMonth() + 1;
+  let date = orderDate.getDate();
+  return `${year}/${month}/${date}`;
+}
+function formatStatusStr(status) {
+  // 假如未處理
+  if (!status) {
+    status = !status;
+    return `未處理`;
+  } else {
+    status = !status;
+    return `已處理`;
+  }
 }

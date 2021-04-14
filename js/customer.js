@@ -15,15 +15,22 @@ deleteAllCartDom.addEventListener("click", deleteCartAllItem, false);
 // 加入購物車
 productDom.addEventListener("click", function (e) {
   e.preventDefault();
+  console.log(cartList);
   if (e.target.getAttribute("data-id") == null) {
     return;
   }
+  let num = 1;
   let id = e.target.getAttribute("data-id");
+  cartList.forEach((item) => {
+    if (item.product.id === id) {
+      num = item.quantity += 1;
+    }
+  });
   axios
     .post(`${baseUrl}customer/${path}/carts`, {
       data: {
         productId: id,
-        quantity: 1,
+        quantity: num,
       },
     })
     .then((res) => {
