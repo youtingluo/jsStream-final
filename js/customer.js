@@ -12,6 +12,7 @@ const finalTotalDom = document.querySelector("#finalTotal");
 const deleteAllCartDom = document.querySelector(".discardAllBtn");
 const myCartDom = document.querySelector(".shoppingCart");
 const productSelect = document.querySelector(".productSelect");
+const sendOrderBtn = document.querySelector(".orderInfo-btn");
 // <------ 監聽 ------>
 // 刪除全部產品
 deleteAllCartDom.addEventListener("click", deleteCartAllItem, false);
@@ -45,6 +46,50 @@ productSelect.addEventListener("change", function () {
     return category === item.category;
   });
   renderProduct(cacheData);
+});
+sendOrderBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  const userName = document.querySelector("#customerName").value;
+  const userPhone = document.querySelector("#customerPhone").value;
+  const userEmail = document.querySelector("#customerEmail").value;
+  const userAddress = document.querySelector("#customerAddress").value;
+  const tradeWay = document.querySelector("#tradeWay").value;
+  if (cartList.length == 0) {
+    alert("購物車為空");
+    return;
+  } else if (
+    userName.trim() == "" ||
+    userPhone.trim() == "" ||
+    userEmail.trim() == "" ||
+    userAddress.trim() == ""
+  ) {
+    alert("請填寫資料");
+    return;
+  }
+
+  axios
+    .post(`${baseUrl}${path}/orders`, {
+      "data": {
+        "user": {
+          "name": userName,
+          "tel": userPhone,
+          "email": userEmail,
+          "address": userAddress,
+          "payment": tradeWay,
+        },
+      },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        alert("訂單交易成功");
+        document.querySelector("#customerName").value = "";
+        document.querySelector("#customerPhone").value = "";
+        document.querySelector("#customerEmail").value = "";
+        document.querySelector("#customerAddress").value = "";
+        document.querySelector("#tradeWay").value = "ATM";
+        getCartList();
+      }
+    });
 });
 // <------ 監聽 結束------>
 // 初始化
@@ -131,40 +176,10 @@ function addOrder() {
       console.log(res.data);
     });
 }
-// 取得訂單列表
-function getOrder() {
-  axios
-    .get(
-      "https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/youting/orders",
-      {
-        headers: {
-          "authorization": token,
-        },
-      }
-    )
-    .then((res) => {
-      console.log(res.data);
-    });
-}
-// 刪除訂單
-function deleteOrderItem(orderID = "") {
-  axios
-    .delete(
-      `https://hexschoollivejs.herokuapp.com/api/livejs/v1/admin/youting/orders/${orderID}`,
-      {
-        headers: {
-          authorization: token,
-        },
-      }
-    )
-    .then((res) => {
-      console.log(res.data);
-    });
-}
 // 渲染產品
-function renderProduct(prodcut) {
+function renderProduct(product) {
   let str = "";
-  prodcut.forEach((item) => {
+  product.forEach((item) => {
     str += `<li class="productCard">
     <h4 class="productType">新品</h4>
     <img src="${item.images}" alt="">
@@ -203,6 +218,8 @@ function renderCart() {
     link.addEventListener("click", deleteCartItem, false);
   });
 }
+
+// util 外部函式
 // 格式化數字
 function formatNumber(num) {
   let formatNum = num
@@ -210,9 +227,3 @@ function formatNumber(num) {
     .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
   return formatNum;
 }
-// deleteItem
-// function deleteCartItem(e) {
-//   let cartId = e.target.dataset.id;
-//   console.log(cartId);
-//   deleteCartItem(cartId);
-// }
