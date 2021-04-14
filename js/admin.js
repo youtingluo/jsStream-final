@@ -18,7 +18,6 @@ function menuToggle() {
 function closeMenu() {
   menu.classList.remove("openMenu");
 }
-
 // C3.js
 let chart = c3.generate({
   bindto: "#chart", // HTML 元素綁定
@@ -38,3 +37,23 @@ let chart = c3.generate({
     },
   },
 });
+// 初始化
+console.log(baseUrl, path, token);
+function init() {
+  getOrderList();
+}
+init();
+// 定義資料
+let orderList = [];
+// 取得訂單
+function getOrderList() {
+  axios
+    .get(`${baseUrl}${path}/orders`, {
+      headers: {
+        authorization: token,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+    });
+}
