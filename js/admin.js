@@ -40,6 +40,7 @@ let chart = c3.generate({
 // DOM
 const orderTable = document.querySelector(".js-orderTable");
 const allOrderTable = document.querySelector(".orderPage-table");
+const deleteAllOrders = document.querySelector(".discardAllBtn");
 // 初始化
 console.log(baseUrl, path, token);
 function init() {
@@ -49,8 +50,15 @@ init();
 // ------ 監聽
 allOrderTable.addEventListener("click", function (e) {
   e.preventDefault();
+  // 判斷點擊刪除按鈕
+  if (e.target.getAttribute("class") === "delSingleOrder-Btn") {
+    // 刪除指定單筆訂單
+    let id = e.target.dataset.id;
+    deleteOrder(id);
+    return;
+  }
+  // 判斷點擊狀態按鈕
   if (!e.target.dataset.status) {
-    console.log("not btn");
     return;
   } else {
     // 修改訂單
@@ -61,11 +69,13 @@ allOrderTable.addEventListener("click", function (e) {
     } else if (dataStr === "true") {
       dataStr = true;
     }
-    console.log(dataStr);
     changeOrderStatus(dataStr, id);
   }
 });
-
+deleteAllOrders.addEventListener("click", function (e) {
+  e.preventDefault();
+  deleteOrder();
+});
 // ------ 監聽結束
 // 定義資料
 let orderList = [];
@@ -135,7 +145,18 @@ function changeOrderStatus(status, id) {
       getOrderList();
     });
 }
-
+// 刪除指定訂單
+function deleteOrder(id = "") {
+  axios
+    .delete(`${baseUrl}admin/${path}/orders/${id}`, {
+      headers: {
+        authorization: token,
+      },
+    })
+    .then((res) => {
+      getOrderList();
+    });
+}
 // 處理訂單字串
 function formatDateStr(timestamp) {
   // 處理日期字串
