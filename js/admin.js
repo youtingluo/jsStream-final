@@ -18,31 +18,11 @@ function menuToggle() {
 function closeMenu() {
   menu.classList.remove("openMenu");
 }
-// C3.js
-let chart = c3.generate({
-  bindto: "#chart", // HTML 元素綁定
-  data: {
-    type: "pie",
-    columns: [
-      ["Louvre 雙人床架", 1],
-      ["Antony 雙人床架", 2],
-      ["Anty 雙人床架", 3],
-      ["其他", 4],
-    ],
-    colors: {
-      "Louvre 雙人床架": "#DACBFF",
-      "Antony 雙人床架": "#9D7FEA",
-      "Anty 雙人床架": "#5434A7",
-      "其他": "#301E5F",
-    },
-  },
-});
 // DOM
 const orderTable = document.querySelector(".js-orderTable");
 const allOrderTable = document.querySelector(".orderPage-table");
 const deleteAllOrders = document.querySelector(".discardAllBtn");
 // 初始化
-console.log(baseUrl, path, token);
 function init() {
   getOrderList();
 }
@@ -90,6 +70,7 @@ function getOrderList() {
     .then((res) => {
       orderList = res.data.orders;
       renderOrderList();
+      processC3Data();
     });
 }
 // 渲染訂單
@@ -97,6 +78,7 @@ function renderOrderList() {
   let str = "";
   orderList.forEach((item) => {
     // 處理產品字串
+    let productStr = formatProductStr(item.products);
     // 處理日期字串
     let dateStr = formatDateStr(item.createdAt);
     // 處理訂單狀態字串
@@ -111,14 +93,18 @@ function renderOrderList() {
       <td>${item.user.address}</td>
       <td>${item.user.email}</td>
       <td>
-        <p>Louvre 雙人床架</p>
+        ${productStr}
       </td>
       <td>${dateStr}</td>
-      <td class="orderStatus">
-        <a href="#" data-status="${item.paid}" data-id="${item.id}">${orderStatus}</a>
+      <td class="${orderStatus == "已處理" ? "orderStatus" : "orderStatus no"}">
+        <a href="#" data-status="${item.paid}" data-id="${
+      item.id
+    }">${orderStatus}</a>
       </td>
       <td>
-        <input type="button" class="delSingleOrder-Btn" data-id="${item.id}" value="刪除">
+        <input type="button" class="delSingleOrder-Btn" data-id="${
+          item.id
+        }" value="刪除">
       </td>
     </tr>`;
   });
@@ -157,7 +143,7 @@ function deleteOrder(id = "") {
       getOrderList();
     });
 }
-// 處理訂單字串
+// 處理訂單日期字串
 function formatDateStr(timestamp) {
   // 處理日期字串
   let orderDate = new Date(timestamp * 1000);
@@ -166,6 +152,7 @@ function formatDateStr(timestamp) {
   let date = orderDate.getDate();
   return `${year}/${month}/${date}`;
 }
+// 處理訂單狀態字串
 function formatStatusStr(status) {
   // 假如未處理
   if (!status) {
@@ -175,4 +162,71 @@ function formatStatusStr(status) {
     status = !status;
     return `已處理`;
   }
+}
+// 處理訂單產品字串
+function formatProductStr(products) {
+  let productStr = "";
+  products.forEach((item) => {
+    productStr += `<p>${item.title} * ${item.quantity}</p>`;
+  });
+  return productStr;
+}
+// 處理 C3 資料
+function processC3Data() {
+  let obj = {};
+  orderList.forEach((item) => {
+    item.products.forEach((product) => {
+      if (obj[product.title] === undefined) {
+        obj[product.title] = product.price * product.quantity;
+      } else {
+        obj[product.title] += product.price * product.quantity;
+      }
+    });
+  });
+  let productKeyArr = Object.keys(obj);
+  const c3Arr = [];
+  productKeyArr.forEach((item) => {
+    let arr = [];
+    arr.push(item);
+    arr.push(obj[item]);
+    c3Arr.push(arr);
+  });
+  c3Arr.sort((a, b) => {
+    return b[1] - a[1];
+  });
+  let top3 = sortTop3(c3Arr);
+  renderC3(top3);
+}
+// 排序 C3 資料
+function sortTop3(arr) {
+  if (arr.length > 3) {
+    let top3 = arr.slice(0, 3);
+    let other = arr.slice(3, arr.length);
+    const otherArr = ["其他"];
+    let total = 0;
+    other.forEach((item) => {
+      total += item[1];
+    });
+    otherArr.push(total);
+    top3.push(otherArr);
+    top3.sort((a, b) => {
+      return b[1] - a[1];
+    });
+    return top3;
+  } else {
+    return arr;
+  }
+}
+// 渲染 C3
+function renderC3(data) {
+  c3.generate({
+    bindto: "#chart", // HTML 元素綁定
+    data: {
+      type: "pie",
+      columns: data,
+    },
+    color: {
+      pattern: ["#301E5F", "#5434A7", "#9D7FEA", "#DACBFF"],
+    },
+  });
 }

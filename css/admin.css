@@ -793,7 +793,14 @@ body {
 .orderStatus a {
   padding: 10px;
   display: block;
-  color: #0067CE;
+  color: #fff;
+  background-color: #12b400;
+  text-align: center;
+  border-radius: 5px;
+}
+.orderStatus.no a {
+  color: #fff;
+  background-color: #f23;
 }
 
 .orderTableWrap {
