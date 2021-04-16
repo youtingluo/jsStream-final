@@ -5,8 +5,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">  
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
   <link rel="stylesheet" href="css/all.css">
   <title>WOWOROOM</title>
 </head>
@@ -397,46 +398,54 @@
   </section>
   <section class="orderInfo wrap" id="orderInfo">
     <h3 class="section-title">填寫預訂資料</h3>
-    <form action="" class="orderInfo-form">
-      <div class="orderInfo-formGroup">
-        <label for="customerName" class="orderInfo-label">姓名</label>
-        <div class="orderInfo-inputWrap">
-          <input type="text" class="orderInfo-input" id="customerName" placeholder="請輸入姓名" name="姓名">
-          <p class="orderInfo-message" data-message="姓名">必填</p>
+    <!--   表單 -->
+    <form class="row g-3">
+      <div class="col-md-12">
+        <label for="customerName" class="form-label">姓名</label>
+        <input type="text" class="form-control" id="customerName" placeholder="姓名" pattern="[^ ]+" required>
+        <div class="invalid-feedback">
+          姓名 必填
         </div>
       </div>
-      <div class="orderInfo-formGroup">
-        <label for="customerPhone" class="orderInfo-label">電話</label>
-        <div class="orderInfo-inputWrap">
-          <input type="tel" class="orderInfo-input" id="customerPhone" placeholder="請輸入電話" name="電話">
-          <p class="orderInfo-message" data-message="電話">必填</p>
+      <div class="col-md-12">
+        <label for="customerPhone" class="form-label">電話</label>
+        <input type="tel" class="form-control" id="customerPhone" placeholder="請輸入電話，至少 8 碼" value="" pattern="\d{8,10}" required>
+        <div class="invalid-feedback">
+          電話 必填或檢查格式是否正確
         </div>
       </div>
-      <div class="orderInfo-formGroup">
-        <label for="customerEmail" class="orderInfo-label">Email</label>
-        <div class="orderInfo-inputWrap">
-          <input type="email" class="orderInfo-input" id="customerEmail" placeholder="請輸入 Email" name="Email">
-          <p class="orderInfo-message" data-message="Email">必填</p>
+      <div class="col-md-12">
+        <label for="customerEmail" class="form-label">email</label>
+        <input type="email" class="form-control" id="customerEmail" placeholder="請輸入 email" pattern="^([\w]+)(.[\w]+)*@([\w]+)(.[\w]{2,3}){1,2}$" required>
+        <div class="invalid-feedback">
+          email 必填或檢查格式是否正確
         </div>
       </div>
-      <div class="orderInfo-formGroup">
-        <label for="customerAddress" class="orderInfo-label">寄送地址</label>
-        <div class="orderInfo-inputWrap">
-          <input type="text" class="orderInfo-input" id="customerAddress" placeholder="請輸入寄送地址" name="寄送地址">
-          <p class="orderInfo-message" data-message="寄送地址">必填</p>
+      <div class="col-md-12">
+        <label for="customerAddress" class="form-label">地址</label>
+        <div class="input-group has-validation">
+          <input type="text" class="form-control" id="customerAddress" aria-describedby="inputGroupPrepend" pattern="[^ ]+"required>
+          <div class="invalid-feedback">
+            地址 必填
+          </div>
         </div>
       </div>
-      <div class="orderInfo-formGroup">
-        <label for="tradeWay" class="orderInfo-label">交易方式</label>
-        <div class="orderInfo-inputWrap">
-          <select id="tradeWay" class="orderInfo-input" name="交易方式">
-            <option value="ATM" selected>ATM</option>
-            <option value="信用卡">信用卡</option>
-            <option value="超商付款">超商付款</option>
-          </select>
+      
+      <div class="col-md-12">
+        <label for="tradeWay" class="form-label">交易方式</label>
+        <select class="form-select" id="tradeWay" required>
+          <option selected disabled value="">請選擇交易方式</option>
+          <option value="ATM">ATM</option>
+          <option value="craditCard">信用卡</option>
+          <option value="store">超商付款</option>
+        </select>
+        <div class="invalid-feedback">
+          請選取交易方式
         </div>
       </div>
-      <input type="submit" value="送出預訂資料" class="orderInfo-btn">
+      <div class="col-12">
+        <button class="btn btn-primary orderInfo-btn" type="button">送出訂單</button>
+      </div>
     </form>
   </section>
 

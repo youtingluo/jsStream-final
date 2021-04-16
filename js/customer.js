@@ -9,13 +9,13 @@ const deleteAllCartDom = document.querySelector(".discardAllBtn");
 const myCartDom = document.querySelector(".shoppingCart");
 const productSelect = document.querySelector(".productSelect");
 const sendOrderBtn = document.querySelector(".orderInfo-btn");
+const forms = document.querySelectorAll(".form-control,.form-select");
 // <------ 監聽 ------>
 // 刪除全部產品
 deleteAllCartDom.addEventListener("click", deleteCartAllItem, false);
 // 加入購物車
 productDom.addEventListener("click", function (e) {
   e.preventDefault();
-  console.log(cartList);
   if (e.target.getAttribute("data-id") == null) {
     return;
   }
@@ -50,49 +50,6 @@ productSelect.addEventListener("change", function () {
   });
   renderProduct(cacheData);
 });
-sendOrderBtn.addEventListener("click", function (e) {
-  e.preventDefault();
-  const userName = document.querySelector("#customerName").value;
-  const userPhone = document.querySelector("#customerPhone").value;
-  const userEmail = document.querySelector("#customerEmail").value;
-  const userAddress = document.querySelector("#customerAddress").value;
-  const tradeWay = document.querySelector("#tradeWay").value;
-  if (cartList.length == 0) {
-    alert("購物車為空");
-    return;
-  } else if (
-    userName.trim() == "" ||
-    userPhone.trim() == "" ||
-    userEmail.trim() == "" ||
-    userAddress.trim() == ""
-  ) {
-    alert("請填寫資料");
-    return;
-  }
-  axios
-    .post(`${baseUrl}customer/${path}/orders`, {
-      "data": {
-        "user": {
-          "name": userName,
-          "tel": userPhone,
-          "email": userEmail,
-          "address": userAddress,
-          "payment": tradeWay,
-        },
-      },
-    })
-    .then((res) => {
-      if (res.data.status) {
-        alert("訂單交易成功");
-        document.querySelector("#customerName").value = "";
-        document.querySelector("#customerPhone").value = "";
-        document.querySelector("#customerEmail").value = "";
-        document.querySelector("#customerAddress").value = "";
-        document.querySelector("#tradeWay").value = "ATM";
-        getCartList();
-      }
-    });
-});
 // <------ 監聽 結束------>
 // 初始化
 init();
@@ -125,6 +82,19 @@ function getCartList() {
     let formatTotal = formatNumber(response.data.finalTotal);
     finalTotalDom.textContent = `NT$${formatTotal}`;
   });
+}
+// 編輯購物車數量
+function editCartItem(id, num) {
+  axios
+    .patch(`${baseUrl}customer/${path}/carts`, {
+      data: {
+        id: id,
+        quantity: Number(num),
+      },
+    })
+    .then(() => {
+      getCartList();
+    });
 }
 // 刪除購物車全部產品
 function deleteCartAllItem(e) {
@@ -178,7 +148,15 @@ function renderCart() {
       </div>
     </td>
     <td>NT$${formatNumber(item.product.price)}</td>
-    <td>${item.quantity}</td>
+    <td>${
+      item.quantity == 1
+        ? `<button disabled data-id="${item.id}">-</button>`
+        : `<button data-edit="minus" data-num="${item.quantity - 1}" data-id="${
+            item.id
+          }">-</button>`
+    } ${item.quantity} <button data-edit="add" data-num="${
+      item.quantity + 1
+    }" data-id="${item.id}">+</button></td>
     <td>NT$${formatNumber(item.product.price * item.quantity)}</td>
     <td class="discardBtn">
       <a href="#" class="material-icons" data-id="${item.id}">
@@ -189,6 +167,16 @@ function renderCart() {
   });
   cartItemDom.innerHTML = str;
   const deleteBtn = document.querySelectorAll(".discardBtn a");
+  const editBtn = document.querySelectorAll("button");
+  editBtn.forEach((btn) => {
+    btn.addEventListener(
+      "click",
+      function (e) {
+        editCartItem(btn.dataset.id, btn.dataset.num);
+      },
+      false
+    );
+  });
   deleteBtn.forEach((link) => {
     link.addEventListener("click", deleteCartItem, false);
   });
@@ -202,3 +190,80 @@ function formatNumber(num) {
     .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
   return formatNum;
 }
+//驗證
+function validateForm() {
+  let validate = true;
+  forms.forEach((item) => {
+    item.addEventListener("focus", function (e) {
+      item.parentNode.classList.add("was-validated");
+      if (!item.value.trim() || !item.value) {
+        validate = false;
+      } else {
+        validate = true;
+      }
+    });
+  });
+}
+
+sendOrderBtn.addEventListener(
+  "click",
+  function (e) {
+    e.preventDefault();
+    if (cartList.length == 0) {
+      alert("購物車不得為空");
+      return;
+    }
+    let validate = true;
+    forms.forEach(function (form) {
+      if (!form.value.trim()) {
+        form.parentNode.classList.add("was-validated");
+        validate = false;
+      } else if (form.getAttribute("id") === "email") {
+        validate = mailValidate(form.value);
+        console.log(validate);
+      }
+    });
+    if (validate) {
+      sendOrder();
+    }
+  },
+  false
+);
+function sendOrder() {
+  const userName = document.querySelector("#customerName").value;
+  const userPhone = document.querySelector("#customerPhone").value;
+  const userEmail = document.querySelector("#customerEmail").value;
+  const userAddress = document.querySelector("#customerAddress").value;
+  const tradeWay = document.querySelector("#tradeWay").value;
+
+  axios
+    .post(`${baseUrl}customer/${path}/orders`, {
+      "data": {
+        "user": {
+          "name": userName,
+          "tel": userPhone,
+          "email": userEmail,
+          "address": userAddress,
+          "payment": tradeWay,
+        },
+      },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        alert("訂單交易成功");
+        forms.forEach((item) => {
+          item.value = "";
+          item.parentNode.classList.remove("was-validated");
+        });
+        getCartList();
+      }
+    });
+}
+// function mailValidate(email) {
+//   console.log(email);
+//   let emailRegxp = /^([\w]+)(.[\w]+)*@([\w]+)(.[\w]{2,3}){1,2}$/;
+//   if (emailRegxp.test(email)) {
+//     console.log(emailRegxp.test(email));
+//     return true;
+//   }
+// }
