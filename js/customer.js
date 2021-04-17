@@ -50,6 +50,32 @@ productSelect.addEventListener("change", function () {
   });
   renderProduct(cacheData);
 });
+// 送出訂單
+sendOrderBtn.addEventListener(
+  "click",
+  function (e) {
+    e.preventDefault();
+    if (cartList.length == 0) {
+      alert("購物車不得為空");
+      location.hash = "#transport";
+      location.href = location.href;
+      validateForm();
+      return false;
+    }
+    let validate = true;
+    forms.forEach(function (form) {
+      if (!form.value.trim()) {
+        form.parentNode.classList.add("was-validated");
+        validate = false;
+      }
+    });
+    if (validate) {
+      sendOrder();
+    }
+  },
+  false
+);
+
 // <------ 監聽 結束------>
 // 初始化
 init();
@@ -57,6 +83,16 @@ function init() {
   getProductList();
   getCartList();
 }
+//驗證表單
+function validateForm() {
+  forms.forEach((item) => {
+    item.parentNode.classList.remove("was-validated");
+    item.addEventListener("blur", function (e) {
+      item.parentNode.classList.add("was-validated");
+    });
+  });
+}
+validateForm();
 // 取得產品列表
 function getProductList() {
   axios
@@ -119,6 +155,12 @@ function deleteCartItem(e) {
       getCartList();
     });
 }
+myCartDom.addEventListener("click", function (e) {
+  if (e.target.dataset.edit !== "remove") {
+    return;
+  }
+  deleteCartItem(e);
+});
 // 新增產品訂單
 function addOrder() {}
 // 渲染產品
@@ -148,15 +190,21 @@ function renderCart() {
       </div>
     </td>
     <td>NT$${formatNumber(item.product.price)}</td>
-    <td>${
+    <td class="js-quantity">  ${
       item.quantity == 1
-        ? `<button disabled data-id="${item.id}">-</button>`
-        : `<button data-edit="minus" data-num="${item.quantity - 1}" data-id="${
-            item.id
-          }">-</button>`
-    } ${item.quantity} <button data-edit="add" data-num="${
+        ? `<span class="material-icons removeItem" data-edit="remove" data-id="${item.id}">
+        delete
+        </span>`
+        : `<span class="material-icons" data-edit="minus" data-num="${
+            item.quantity - 1
+          }" data-id="${item.id}">
+          remove
+          </span>`
+    } ${item.quantity}<span class="material-icons" data-edit="add" data-num="${
       item.quantity + 1
-    }" data-id="${item.id}">+</button></td>
+    }" data-id="${item.id}">
+    add
+    </span></td>
     <td>NT$${formatNumber(item.product.price * item.quantity)}</td>
     <td class="discardBtn">
       <a href="#" class="material-icons" data-id="${item.id}">
@@ -165,9 +213,12 @@ function renderCart() {
     </td>
   </tr>`;
   });
+
   cartItemDom.innerHTML = str;
+
   const deleteBtn = document.querySelectorAll(".discardBtn a");
-  const editBtn = document.querySelectorAll("button");
+  const editBtn = document.querySelectorAll(".js-quantity [data-num]");
+
   editBtn.forEach((btn) => {
     btn.addEventListener(
       "click",
@@ -181,61 +232,13 @@ function renderCart() {
     link.addEventListener("click", deleteCartItem, false);
   });
 }
-
-// util 外部函式
-// 格式化數字
-function formatNumber(num) {
-  let formatNum = num
-    .toString()
-    .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-  return formatNum;
-}
-//驗證
-function validateForm() {
-  let validate = true;
-  forms.forEach((item) => {
-    item.addEventListener("focus", function (e) {
-      item.parentNode.classList.add("was-validated");
-      if (!item.value.trim() || !item.value) {
-        validate = false;
-      } else {
-        validate = true;
-      }
-    });
-  });
-}
-
-sendOrderBtn.addEventListener(
-  "click",
-  function (e) {
-    e.preventDefault();
-    if (cartList.length == 0) {
-      alert("購物車不得為空");
-      return;
-    }
-    let validate = true;
-    forms.forEach(function (form) {
-      if (!form.value.trim()) {
-        form.parentNode.classList.add("was-validated");
-        validate = false;
-      } else if (form.getAttribute("id") === "email") {
-        validate = mailValidate(form.value);
-        console.log(validate);
-      }
-    });
-    if (validate) {
-      sendOrder();
-    }
-  },
-  false
-);
+// 送出訂單
 function sendOrder() {
   const userName = document.querySelector("#customerName").value;
   const userPhone = document.querySelector("#customerPhone").value;
   const userEmail = document.querySelector("#customerEmail").value;
   const userAddress = document.querySelector("#customerAddress").value;
   const tradeWay = document.querySelector("#tradeWay").value;
-
   axios
     .post(`${baseUrl}customer/${path}/orders`, {
       "data": {
@@ -256,14 +259,15 @@ function sendOrder() {
           item.parentNode.classList.remove("was-validated");
         });
         getCartList();
+        location.href = `${location.origin}${location.pathname}`;
       }
     });
 }
-// function mailValidate(email) {
-//   console.log(email);
-//   let emailRegxp = /^([\w]+)(.[\w]+)*@([\w]+)(.[\w]{2,3}){1,2}$/;
-//   if (emailRegxp.test(email)) {
-//     console.log(emailRegxp.test(email));
-//     return true;
-//   }
-// }
+// util 外部函式
+// 格式化數字
+function formatNumber(num) {
+  let formatNum = num
+    .toString()
+    .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  return formatNum;
+}

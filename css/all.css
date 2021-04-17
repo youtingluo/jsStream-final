@@ -833,3 +833,13 @@ body {
 .orderTableWrap::-webkit-scrollbar {
   display: none;
 }
+.js-quantity span {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  margin: 0 5px;
+}
+.js-quantity span:hover{
+  color: #301E5F;
+  transform: scale(1.2);
+}

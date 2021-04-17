@@ -401,21 +401,21 @@
     <!--   表單 -->
     <form class="row g-3">
       <div class="col-md-12">
-        <label for="customerName" class="form-label">姓名</label>
-        <input type="text" class="form-control" id="customerName" placeholder="姓名" pattern="[^ ]+" required>
+        <label for="customerName" class="form-label">姓名 ex: 王大明</label>
+        <input type="text" class="form-control" id="customerName" placeholder="請輸入姓名" pattern="[^ ]+" required>
         <div class="invalid-feedback">
           姓名 必填
         </div>
       </div>
       <div class="col-md-12">
-        <label for="customerPhone" class="form-label">電話</label>
+        <label for="customerPhone" class="form-label">電話或手機 ex: 22551133</label>
         <input type="tel" class="form-control" id="customerPhone" placeholder="請輸入電話，至少 8 碼" value="" pattern="\d{8,10}" required>
         <div class="invalid-feedback">
           電話 必填或檢查格式是否正確
         </div>
       </div>
       <div class="col-md-12">
-        <label for="customerEmail" class="form-label">email</label>
+        <label for="customerEmail" class="form-label">email ex: miss@com.tw</label>
         <input type="email" class="form-control" id="customerEmail" placeholder="請輸入 email" pattern="^([\w]+)(.[\w]+)*@([\w]+)(.[\w]{2,3}){1,2}$" required>
         <div class="invalid-feedback">
           email 必填或檢查格式是否正確
@@ -424,7 +424,7 @@
       <div class="col-md-12">
         <label for="customerAddress" class="form-label">地址</label>
         <div class="input-group has-validation">
-          <input type="text" class="form-control" id="customerAddress" aria-describedby="inputGroupPrepend" pattern="[^ ]+"required>
+          <input type="text" class="form-control" id="customerAddress" placeholder="請輸入地址" aria-describedby="inputGroupPrepend" pattern="[^ ]+"required>
           <div class="invalid-feedback">
             地址 必填
           </div>
