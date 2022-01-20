@@ -1,6 +1,7 @@
 // data
 let productList = [];
 let cartList = [];
+console.log(baseUrl)
 // DOM
 const productDom = document.querySelector(".productWrap");
 const cartItemDom = document.querySelector(".js-cartItem");
