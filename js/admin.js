@@ -1,12 +1,10 @@
-// 預設 JS，請同學不要修改此處
-let menuOpenBtn = document.querySelector(".menuToggle");
-let linkBtn = document.querySelectorAll(".topBar-menu a");
-let menu = document.querySelector(".topBar-menu");
-menuOpenBtn.addEventListener("click", menuToggle);
-
-linkBtn.forEach((item) => {
-  item.addEventListener("click", closeMenu);
-});
+// DOM
+const orderTable = document.querySelector(".js-orderTable");
+const allOrderTable = document.querySelector(".orderPage-table");
+const deleteAllOrders = document.querySelector(".discardAllBtn");
+const menuOpenBtn = document.querySelector(".menuToggle");
+const linkBtn = document.querySelectorAll(".topBar-menu a");
+const menu = document.querySelector(".topBar-menu");
 
 function menuToggle() {
   if (menu.classList.contains("openMenu")) {
@@ -18,16 +16,17 @@ function menuToggle() {
 function closeMenu() {
   menu.classList.remove("openMenu");
 }
-// DOM
-const orderTable = document.querySelector(".js-orderTable");
-const allOrderTable = document.querySelector(".orderPage-table");
-const deleteAllOrders = document.querySelector(".discardAllBtn");
 // 初始化
 function init() {
   getOrderList();
 }
 init();
 // ------ 監聽
+menuOpenBtn.addEventListener("click", menuToggle);
+
+linkBtn.forEach((item) => {
+  item.addEventListener("click", closeMenu);
+});
 allOrderTable.addEventListener("click", function (e) {
   e.preventDefault();
   // 判斷點擊刪除按鈕
